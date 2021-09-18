@@ -2,6 +2,8 @@ package com.knife4j.demo.controller;
 
 import com.github.xiaoymin.knife4j.annotations.ApiOperationSupport;
 import com.github.xiaoymin.knife4j.annotations.ApiSupport;
+import com.knife4j.demo.config.ApiVersion;
+import com.knife4j.demo.config.ApiVersionCst;
 import com.knife4j.demo.model.Result;
 import com.knife4j.demo.model.User;
 import com.knife4j.demo.model.UserReq;
@@ -28,6 +30,7 @@ import java.util.List;
  * @date 2021/7/1 11:48
  */
 @Api(tags = "用户模块")
+@ApiVersion(ApiVersionCst.VERSION_2_7_3)
 @ApiSupport(author = "wangxutao@cnstrong.com",order = 284)
 @RestController
 @Validated
