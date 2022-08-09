@@ -1,6 +1,8 @@
 package com.knife4j.demo.config;
 
 import com.github.xiaoymin.knife4j.spring.extension.OpenApiExtensionResolver;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
@@ -34,7 +36,7 @@ import java.util.Optional;
 @Configuration
 @EnableOpenApi
 @Import(BeanValidatorPluginsConfiguration.class)
-public class SwaggerConfiguration implements InitializingBean {
+public class SwaggerConfig implements InitializingBean {
 
     /**
      * 引入Knife4j提供的扩展类
@@ -48,7 +50,7 @@ public class SwaggerConfiguration implements InitializingBean {
     private ApplicationContext applicationContext;
 
     @Autowired
-    public SwaggerConfiguration(OpenApiExtensionResolver openApiExtensionResolver) {
+    public SwaggerConfig(OpenApiExtensionResolver openApiExtensionResolver) {
         this.openApiExtensionResolver = openApiExtensionResolver;
     }
 
@@ -59,18 +61,19 @@ public class SwaggerConfiguration implements InitializingBean {
     @Bean
     public Docket defaultApi() {
         String groupName = "default(所有controller)";
-        return new Docket(DocumentationType.SWAGGER_2)
+        return new Docket(DocumentationType.OAS_30)
                 // 用来创建该API的基本信息，展示在文档的页面中（自定义展示的信息）
                 .apiInfo(apiInfo())
                 .groupName(groupName)
                 // 设置哪些接口暴露给Swagger展示
                 .select()
                 // (第一种方式)扫描指定包中的swagger注解
-                .apis(RequestHandlerSelectors.basePackage("com.knife4j.demo.controller"))
+                // .apis(RequestHandlerSelectors.basePackage("com.knife4j.demo.controller"))
                 // (第二种方式)扫描所有
                 //.apis(RequestHandlerSelectors.any())
                 // (第三种方式)扫描所有有注解的api
-                // .apis( RequestHandlerSelectors.withMethodAnnotation(ApiOperation.class))
+                .apis(RequestHandlerSelectors.withClassAnnotation(Api.class))
+                .apis(RequestHandlerSelectors.withMethodAnnotation(ApiOperation.class))
                 .paths(PathSelectors.any())
                 // 筛选指定url的类
                 // .paths(PathSelectors.ant("/user/*"))
@@ -138,15 +141,14 @@ public class SwaggerConfiguration implements InitializingBean {
                 .select()
                 .apis(method -> {
                     // 每个方法会进入这里进行判断并归类到不同分组，**请不要调换下面两段代码的顺序，在方法上的注解有优先级**
+                    Optional<ApiVersion> apiVersion = method.findAnnotation(ApiVersion.class);
                     // 该方法上标注了版本
-                    if (method.isAnnotatedWith(ApiVersion.class)) {
-                        Optional<ApiVersion> apiVersion = method.findAnnotation(ApiVersion.class);
-                        if (apiVersion.isPresent()) {
-                            String[] values = apiVersion.get().value();
-                            if (!Objects.equals(values.length, 0) && Arrays.asList(values).contains(groupName)) {
-                                return Boolean.TRUE;
-                            }
+                    if (apiVersion.isPresent()) {
+                        String[] values = apiVersion.get().value();
+                        if (!Objects.equals(values.length, 0) && Arrays.asList(values).contains(groupName)) {
+                            return Boolean.TRUE;
                         }
+                        return Boolean.FALSE;
                     }
 
                     // 方法所在的类是否标注了版本?
@@ -185,7 +187,7 @@ public class SwaggerConfiguration implements InitializingBean {
                 // 要注意 "工厂名和方法名"，意思是用这个bean的指定方法创建docket
                 AbstractBeanDefinition beanDefinition = BeanDefinitionBuilder
                         .genericBeanDefinition()
-                        .setFactoryMethodOnBean("buildDocket", "swaggerConfiguration")
+                        .setFactoryMethodOnBean("buildDocket", "swaggerConfig")
                         .addConstructorArgValue(declaredField.get(ApiVersionCst.class)).getBeanDefinition();
                 capableBeanFactory.registerBeanDefinition(declaredField.getName(), beanDefinition);
             }

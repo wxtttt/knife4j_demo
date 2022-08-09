@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
  * @since 1.0.1
  */
 @Api(tags = "新版用户模块")
-@ApiVersion(ApiVersionCst.VERSION_2_8)
+
 @RestController
 @RequestMapping("new")
 public class NewUserController {

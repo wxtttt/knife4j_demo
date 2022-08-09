@@ -1,6 +1,8 @@
 package com.knife4j.demo.controller;
 
 import com.github.xiaoymin.knife4j.annotations.ApiSupport;
+import com.knife4j.demo.config.ApiVersion;
+import com.knife4j.demo.config.ApiVersionCst;
 import com.knife4j.demo.model.Result;
 import com.knife4j.demo.util.ComUtil;
 import io.swagger.annotations.Api;
